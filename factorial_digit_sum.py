@@ -1,263 +1,373 @@
 """
-Factorial Digit Sum Calculator - Object-Oriented Implementation
+Factorial Digit Sum Calculator - SOLID Principles Implementation
 
 This application calculates the factorial of 100 and then computes the sum of
-all digits in the resulting factorial number. Demonstrates OOP principles
-including encapsulation, single responsibility, and composition.
+all digits in the resulting factorial number. Demonstrates SOLID principles
+including Single Responsibility, Open/Closed, Liskov Substitution, Interface
+Segregation, and Dependency Inversion.
 
-OOP CONCEPTS DEMONSTRATED:
-- Encapsulation: Private attributes and methods, data hiding
-- Single Responsibility Principle: Each class has one clear purpose
-- Composition: Classes working together to achieve functionality
-- Abstraction: Complex operations hidden behind simple interfaces
-- Modularity: Code organized into logical, reusable units
+SOLID PRINCIPLES DEMONSTRATED:
+- Single Responsibility: Each class has one reason to change
+- Open/Closed: Classes are open for extension, closed for modification
+- Liskov Substitution: Subclasses can replace base classes seamlessly
+- Interface Segregation: Clients depend only on interfaces they use
+- Dependency Inversion: High-level modules depend on abstractions, not concretions
 """
 
 import math
+from abc import ABC, abstractmethod
 
 
-# OOP CONCEPT: CLASS DEFINITION - Blueprints for creating objects
-class FactorialCalculator:
+# SOLID: INTERFACE SEGREGATION PRINCIPLE
+# Creating focused interfaces that clients actually need
+class CalculatorInterface(ABC):
+    """Interface for mathematical calculations."""
+
+    @abstractmethod
+    def calculate(self, number: int) -> int:
+        """Calculate a mathematical operation on a number."""
+        pass
+
+
+# SOLID: INTERFACE SEGREGATION PRINCIPLE
+# Separate interface for cacheable operations
+class CacheableInterface(ABC):
+    """Interface for operations that can be cached."""
+
+    @abstractmethod
+    def get_cached_result(self) -> tuple:
+        """Get the last cached calculation result."""
+        pass
+
+
+# SOLID: INTERFACE SEGREGATION PRINCIPLE
+# Dedicated interface for display operations
+class DisplayInterface(ABC):
+    """Interface for display operations."""
+
+    @abstractmethod
+    def display(self, content: str) -> None:
+        """Display content to the user."""
+        pass
+
+
+# SOLID: INTERFACE SEGREGATION PRINCIPLE
+# Specific interface for formatting operations
+class FormatterInterface(ABC):
+    """Interface for formatting operations."""
+
+    @abstractmethod
+    def format_header(self) -> str:
+        """Format application header."""
+        pass
+
+    @abstractmethod
+    def format_calculation_start(self, number: int) -> str:
+        """Format calculation start message."""
+        pass
+
+    @abstractmethod
+    def format_result(self, number: int, result: int) -> str:
+        """Format calculation result."""
+        pass
+
+
+# SOLID: SINGLE RESPONSIBILITY PRINCIPLE
+# This class has one responsibility: calculating factorials
+class FactorialCalculator(CalculatorInterface, CacheableInterface):
     """
-    Handles factorial computation with encapsulation of calculation logic.
+    Calculates factorial values with caching capability.
 
-    OOP CONCEPT: SINGLE RESPONSIBILITY PRINCIPLE
-    This class has one clear responsibility: calculating factorials
+    SOLID: SINGLE RESPONSIBILITY - Only responsible for factorial calculations
+    SOLID: INTERFACE SEGREGATION - Implements only needed interfaces
     """
 
     def __init__(self):
+        self._cached_number = None
+        self._cached_result = None
+
+    # SOLID: LISKOV SUBSTITUTION PRINCIPLE
+    # This implementation can substitute any CalculatorInterface
+    def calculate(self, number: int) -> int:
         """
-        Initialize the factorial calculator.
+        Calculate factorial with validation and caching.
 
-        OOP CONCEPT: CONSTRUCTOR - Special method to initialize object state
+        SOLID: SINGLE RESPONSIBILITY - One method, one purpose
         """
-        # OOP CONCEPT: ENCAPSULATION - Private attributes (name mangling with _)
-        # These attributes are hidden from direct external access
-        self._last_calculated_value = None
-        self._last_calculated_factorial = None
+        self._validate_input(number)
 
-    def calculate_factorial(self, number: int) -> int:
-        """
-        Calculate the factorial of a given number.
+        if self._is_result_cached(number):
+            return self._cached_result
 
-        OOP CONCEPT: METHOD - Function that operates on object data
-        OOP CONCEPT: ABSTRACTION - Complex calculation hidden behind simple interface
-
-        Args:
-            number: The number to calculate factorial for
-
-        Returns:
-            The factorial result as an integer
-        """
-        # OOP CONCEPT: DATA VALIDATION - Protecting object state
-        if number < 0:
-            raise ValueError("Factorial is not defined for negative numbers")
-
-        if number == 0 or number == 1:
-            return 1
-
-        # Use Python's built-in math.factorial for efficiency and accuracy
-        result = math.factorial(number)
-
-        # OOP CONCEPT: STATE MANAGEMENT - Updating internal object state
-        # Cache the result for potential future use
-        self._last_calculated_value = number
-        self._last_calculated_factorial = result
-
+        result = self._compute_factorial(number)
+        self._cache_result(number, result)
         return result
 
-    def get_last_calculation(self) -> tuple:
-        """
-        Get the last calculated factorial value and its input.
+    # SOLID: LISKOV SUBSTITUTION PRINCIPLE
+    # This implementation can substitute any CacheableInterface
+    def get_cached_result(self) -> tuple:
+        """Return cached calculation data."""
+        return self._cached_number, self._cached_result
 
-        OOP CONCEPT: ACCESSOR METHOD - Controlled access to private data
-        OOP CONCEPT: ENCAPSULATION - Providing controlled access to internal state
-
-        Returns:
-            Tuple of (input_value, factorial_result) or (None, None) if no calculation done
-        """
-        return self._last_calculated_value, self._last_calculated_factorial
-
-
-# OOP CONCEPT: SEPARATE CLASS FOR DIFFERENT RESPONSIBILITY
-class DigitSumCalculator:
-    """
-    Handles digit sum computation for large numbers.
-
-    OOP CONCEPT: SINGLE RESPONSIBILITY PRINCIPLE
-    This class has one clear responsibility: calculating digit sums
-    """
-
-    def calculate_digit_sum(self, number: int) -> int:
-        """
-        Calculate the sum of all digits in a number.
-
-        OOP CONCEPT: METHOD - Behavior associated with the class
-        OOP CONCEPT: ABSTRACTION - Complex string manipulation hidden behind simple interface
-
-        Args:
-            number: The number to calculate digit sum for
-
-        Returns:
-            The sum of all digits in the number
-        """
-        # OOP CONCEPT: DATA VALIDATION AND TRANSFORMATION
+    # SOLID: SINGLE RESPONSIBILITY PRINCIPLE
+    # Each private method has one specific responsibility
+    def _validate_input(self, number: int) -> None:
+        """Validate input for factorial calculation."""
         if number < 0:
-            number = abs(number)  # Handle negative numbers by taking absolute value
+            raise ValueError("Factorial undefined for negative numbers")
 
-        # Convert to string and sum each digit
-        digit_sum = sum(int(digit) for digit in str(number))
+    def _is_result_cached(self, number: int) -> bool:
+        """Check if result is cached for given number."""
+        return self._cached_number == number and self._cached_result is not None
 
-        return digit_sum
+    def _compute_factorial(self, number: int) -> int:
+        """Compute factorial using standard library."""
+        return math.factorial(number)
+
+    def _cache_result(self, number: int, result: int) -> None:
+        """Cache the calculation result."""
+        self._cached_number = number
+        self._cached_result = result
 
 
-# OOP CONCEPT: SEPARATION OF CONCERNS - Display logic in separate class
-class ResultDisplay:
+# SOLID: SINGLE RESPONSIBILITY PRINCIPLE
+# This class has one responsibility: calculating digit sums
+class DigitSumCalculator(CalculatorInterface):
     """
-    Handles output formatting and display of results.
+    Calculates sum of digits in a number.
 
-    OOP CONCEPT: SINGLE RESPONSIBILITY PRINCIPLE
-    This class has one clear responsibility: displaying results
-    """
-
-    def __init__(self):
-        """
-        Initialize the result display handler.
-
-        OOP CONCEPT: CONSTRUCTOR - Initialize object with default state
-        """
-        # OOP CONCEPT: ENCAPSULATION - Private attributes for internal configuration
-        self._title = "Factorial Digit Sum Calculator"
-        self._separator = "=" * len(self._title)
-
-    def display_header(self):
-        """
-        Display the application header.
-
-        OOP CONCEPT: METHOD - Behavior encapsulated within the class
-        """
-        print(self._title)
-        print(self._separator)
-        print()
-
-    def display_calculation_start(self, number: int):
-        """
-        Display message indicating calculation is starting.
-
-        OOP CONCEPT: METHOD WITH PARAMETERS - Flexible behavior based on input
-
-        Args:
-            number: The number being calculated
-        """
-        print(f"Calculating {number}!...")
-
-    def display_factorial_result(self, number: int, factorial: int):
-        """
-        Display the factorial result.
-
-        OOP CONCEPT: METHOD - Encapsulated behavior for specific display task
-
-        Args:
-            number: The input number
-            factorial: The calculated factorial
-        """
-        print(f"{number}! = {factorial}")
-        print()
-
-    def display_final_result(self, number: int, digit_sum: int):
-        """
-        Display the final digit sum result.
-
-        OOP CONCEPT: METHOD - Specific behavior for final result display
-
-        Args:
-            number: The input number
-            digit_sum: The calculated digit sum
-        """
-        print(f"Sum of digits in {number}!: {digit_sum}")
-
-
-# OOP CONCEPT: MAIN ORCHESTRATOR CLASS - Coordinates other classes
-class Application:
-    """
-    Main application orchestrator that coordinates all components.
-
-    OOP CONCEPT: COMPOSITION - This class is composed of other classes
-    OOP CONCEPT: SINGLE RESPONSIBILITY - Orchestrates the application flow
+    SOLID: SINGLE RESPONSIBILITY - Only responsible for digit sum calculations
+    SOLID: LISKOV SUBSTITUTION - Can substitute any CalculatorInterface
     """
 
-    def __init__(self):
+    def calculate(self, number: int) -> int:
         """
-        Initialize the application with its components.
+        Calculate sum of digits in a number.
 
-        OOP CONCEPT: CONSTRUCTOR - Setting up object dependencies
+        SOLID: SINGLE RESPONSIBILITY - One clear purpose
         """
-        # OOP CONCEPT: COMPOSITION - Creating instances of other classes
-        # This class "has-a" relationship with other classes
-        self._factorial_calculator = FactorialCalculator()
-        self._digit_sum_calculator = DigitSumCalculator()
-        self._result_display = ResultDisplay()
+        absolute_number = abs(number)
+        return sum(int(digit) for digit in str(absolute_number))
 
-        # OOP CONCEPT: ENCAPSULATION - Private configuration data
-        self._target_number = 100  # Hardcoded as per requirements
 
-    def run(self):
+# SOLID: SINGLE RESPONSIBILITY PRINCIPLE
+# This class has one responsibility: console output
+class ConsoleDisplay(DisplayInterface):
+    """
+    Handles console output operations.
+
+    SOLID: SINGLE RESPONSIBILITY - Only responsible for console display
+    SOLID: LISKOV SUBSTITUTION - Can substitute any DisplayInterface
+    """
+
+    def display(self, content: str) -> None:
+        """Display content to console."""
+        print(content)
+
+
+# SOLID: SINGLE RESPONSIBILITY PRINCIPLE
+# This class has one responsibility: formatting messages
+class MessageFormatter(FormatterInterface):
+    """
+    Formats messages for display.
+
+    SOLID: SINGLE RESPONSIBILITY - Only responsible for message formatting
+    SOLID: OPEN/CLOSED PRINCIPLE - Can be extended without modification
+    """
+
+    def __init__(self, title: str):
+        self._title = title
+        self._separator = "=" * len(title)
+
+    def format_header(self) -> str:
+        """Format application header."""
+        return f"{self._title}\n{self._separator}\n"
+
+    def format_calculation_start(self, number: int) -> str:
+        """Format calculation start message."""
+        return f"Calculating {number}!..."
+
+    def format_result(self, number: int, result: int) -> str:
+        """Format calculation result."""
+        return f"{number}! = {result}\n"
+
+
+# SOLID: OPEN/CLOSED PRINCIPLE
+# Extended formatter without modifying the base class
+class ExtendedMessageFormatter(MessageFormatter):
+    """
+    Extended message formatter with additional formatting capabilities.
+
+    SOLID: OPEN/CLOSED PRINCIPLE - Extends functionality without modifying parent
+    SOLID: LISKOV SUBSTITUTION - Can substitute MessageFormatter
+    """
+
+    def format_digit_sum_result(self, number: int, digit_sum: int) -> str:
+        """Format digit sum result message."""
+        return f"Sum of digits in {number}!: {digit_sum}"
+
+
+# SOLID: SINGLE RESPONSIBILITY PRINCIPLE
+# This class has one responsibility: managing application workflow
+class ApplicationOrchestrator:
+    """
+    Orchestrates the application workflow.
+
+    SOLID: SINGLE RESPONSIBILITY - Only responsible for workflow coordination
+    SOLID: DEPENDENCY INVERSION - Depends on abstractions, not concretions
+    """
+
+    def __init__(
+        self,
+        factorial_calculator: CalculatorInterface,
+        digit_sum_calculator: CalculatorInterface,
+        display: DisplayInterface,
+        formatter: ExtendedMessageFormatter,
+    ):
         """
-        Execute the main application logic.
+        Initialize with dependencies.
 
-        OOP CONCEPT: METHOD - Main behavior of the Application class
-        OOP CONCEPT: ABSTRACTION - Complex workflow hidden behind simple interface
-        OOP CONCEPT: COMPOSITION - Using other objects to accomplish tasks
+        SOLID: DEPENDENCY INVERSION - Depends on abstractions (interfaces)
+        SOLID: INTERFACE SEGREGATION - Only depends on needed interfaces
+        """
+        self._factorial_calculator = factorial_calculator
+        self._digit_sum_calculator = digit_sum_calculator
+        self._display = display
+        self._formatter = formatter
+        self._target_number = 100
 
-        This method orchestrates the entire calculation process:
-        1. Display header
-        2. Calculate factorial
-        3. Calculate digit sum
-        4. Display results
+    def run(self) -> bool:
+        """
+        Execute the application workflow.
+
+        SOLID: SINGLE RESPONSIBILITY - One method, one workflow
         """
         try:
-            # OOP CONCEPT: METHOD DELEGATION - Delegating tasks to appropriate objects
-            # Display application header
-            self._result_display.display_header()
-
-            # Indicate calculation is starting
-            self._result_display.display_calculation_start(self._target_number)
-
-            # OOP CONCEPT: OBJECT COLLABORATION - Objects working together
-            # Calculate factorial using the factorial calculator
-            factorial_result = self._factorial_calculator.calculate_factorial(
-                self._target_number
-            )
-
-            # Display factorial result
-            self._result_display.display_factorial_result(
-                self._target_number, factorial_result
-            )
-
-            # Calculate digit sum using the digit sum calculator
-            digit_sum = self._digit_sum_calculator.calculate_digit_sum(factorial_result)
-
-            # Display final result
-            self._result_display.display_final_result(self._target_number, digit_sum)
-
-        except Exception as e:
-            # OOP CONCEPT: ERROR HANDLING - Protecting object state and providing feedback
-            print(f"Error: {e}")
+            self._display_header()
+            self._display_calculation_start()
+            factorial_result = self._calculate_factorial()
+            self._display_factorial_result(factorial_result)
+            digit_sum = self._calculate_digit_sum(factorial_result)
+            self._display_digit_sum_result(digit_sum)
+            return True
+        except Exception as error:
+            self._handle_error(error)
             return False
 
-        return True
+    # SOLID: SINGLE RESPONSIBILITY PRINCIPLE
+    # Each method has one specific responsibility
+    def _display_header(self) -> None:
+        """Display application header."""
+        header = self._formatter.format_header()
+        self._display.display(header)
+
+    def _display_calculation_start(self) -> None:
+        """Display calculation start message."""
+        start_message = self._formatter.format_calculation_start(self._target_number)
+        self._display.display(start_message)
+
+    def _calculate_factorial(self) -> int:
+        """Calculate factorial using injected calculator."""
+        return self._factorial_calculator.calculate(self._target_number)
+
+    def _display_factorial_result(self, factorial_result: int) -> None:
+        """Display factorial calculation result."""
+        result_message = self._formatter.format_result(
+            self._target_number, factorial_result
+        )
+        self._display.display(result_message)
+
+    def _calculate_digit_sum(self, factorial_result: int) -> int:
+        """Calculate digit sum using injected calculator."""
+        return self._digit_sum_calculator.calculate(factorial_result)
+
+    def _display_digit_sum_result(self, digit_sum: int) -> None:
+        """Display digit sum calculation result."""
+        digit_sum_message = self._formatter.format_digit_sum_result(
+            self._target_number, digit_sum
+        )
+        self._display.display(digit_sum_message)
+
+    def _handle_error(self, error: Exception) -> None:
+        """Handle application errors."""
+        error_message = f"Error: {error}"
+        self._display.display(error_message)
 
 
-# OOP CONCEPT: PROCEDURAL INTERFACE - Simple function interface for object-oriented code
-def main():
+# SOLID: DEPENDENCY INVERSION PRINCIPLE
+# Factory creates concrete implementations but returns abstractions
+class CalculatorFactory:
     """
-    Main entry point for the application.
+    Factory for creating calculator instances.
 
-    OOP CONCEPT: OBJECT INSTANTIATION - Creating an instance of the Application class
+    SOLID: SINGLE RESPONSIBILITY - Only responsible for creating calculators
+    SOLID: DEPENDENCY INVERSION - Returns abstractions, not concretions
     """
-    # OOP CONCEPT: OBJECT CREATION AND METHOD INVOCATION
-    app = Application()  # Create instance
-    app.run()  # Call method on instance
+
+    @staticmethod
+    def create_factorial_calculator() -> CalculatorInterface:
+        """Create factorial calculator instance."""
+        return FactorialCalculator()
+
+    @staticmethod
+    def create_digit_sum_calculator() -> CalculatorInterface:
+        """Create digit sum calculator instance."""
+        return DigitSumCalculator()
+
+
+# SOLID: DEPENDENCY INVERSION PRINCIPLE
+# Factory for display-related components
+class DisplayFactory:
+    """
+    Factory for creating display-related instances.
+
+    SOLID: SINGLE RESPONSIBILITY - Only responsible for creating display components
+    SOLID: DEPENDENCY INVERSION - Returns abstractions, not concretions
+    """
+
+    @staticmethod
+    def create_console_display() -> DisplayInterface:
+        """Create console display instance."""
+        return ConsoleDisplay()
+
+    @staticmethod
+    def create_message_formatter() -> ExtendedMessageFormatter:
+        """Create message formatter instance."""
+        return ExtendedMessageFormatter("Factorial Digit Sum Calculator")
+
+
+# SOLID: DEPENDENCY INVERSION PRINCIPLE
+# High-level function depends on abstractions through dependency injection
+def create_application() -> ApplicationOrchestrator:
+    """
+    Create application with all dependencies.
+
+    SOLID: DEPENDENCY INVERSION - Assembles dependencies using abstractions
+    SOLID: SINGLE RESPONSIBILITY - Only responsible for application assembly
+    """
+    # Create dependencies using factories
+    factorial_calculator = CalculatorFactory.create_factorial_calculator()
+    digit_sum_calculator = CalculatorFactory.create_digit_sum_calculator()
+    display = DisplayFactory.create_console_display()
+    formatter = DisplayFactory.create_message_formatter()
+
+    # SOLID: DEPENDENCY INVERSION - Inject dependencies as abstractions
+    return ApplicationOrchestrator(
+        factorial_calculator=factorial_calculator,
+        digit_sum_calculator=digit_sum_calculator,
+        display=display,
+        formatter=formatter,
+    )
+
+
+def main() -> None:
+    """
+    Application entry point.
+
+    SOLID: DEPENDENCY INVERSION - Uses factory to create dependencies
+    """
+    application = create_application()
+    application.run()
 
 
 if __name__ == "__main__":
