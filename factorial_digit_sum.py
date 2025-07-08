@@ -1,264 +1,197 @@
 """
-Factorial Digit Sum Calculator - Object-Oriented Implementation
+Factorial Digit Sum Calculator - Clean Code Implementation
 
 This application calculates the factorial of 100 and then computes the sum of
-all digits in the resulting factorial number. Demonstrates OOP principles
-including encapsulation, single responsibility, and composition.
+all digits in the resulting factorial number. Demonstrates Clean Code principles
+including meaningful names, single responsibility, DRY, and self-documentation.
 
-OOP CONCEPTS DEMONSTRATED:
-- Encapsulation: Private attributes and methods, data hiding
-- Single Responsibility Principle: Each class has one clear purpose
-- Composition: Classes working together to achieve functionality
-- Abstraction: Complex operations hidden behind simple interfaces
-- Modularity: Code organized into logical, reusable units
+CLEAN CODE PRINCIPLES DEMONSTRATED:
+- Meaningful Names: Variables and functions have descriptive, intention-revealing names
+- Single Responsibility: Each function and class has one clear purpose
+- DRY (Don't Repeat Yourself): Code duplication is minimized
+- Self-Documentation: Code explains itself without excessive comments
+- Simplicity: Functions are small and focused
+- Consistency: Uniform naming conventions and formatting
+- Modularity: Code is broken into small, reusable components
 """
 
 import math
 
 
-# OOP CONCEPT: CLASS DEFINITION - Blueprints for creating objects
+# CLEAN CODE: MEANINGFUL NAMES - Class name clearly indicates its purpose
 class FactorialCalculator:
-    """
-    Handles factorial computation with encapsulation of calculation logic.
-
-    OOP CONCEPT: SINGLE RESPONSIBILITY PRINCIPLE
-    This class has one clear responsibility: calculating factorials
-    """
+    """Calculates factorial values with caching for efficiency."""
 
     def __init__(self):
-        """
-        Initialize the factorial calculator.
+        # CLEAN CODE: MEANINGFUL NAMES - Variables clearly indicate their purpose
+        self.cached_number = None
+        self.cached_result = None
 
-        OOP CONCEPT: CONSTRUCTOR - Special method to initialize object state
-        """
-        # OOP CONCEPT: ENCAPSULATION - Private attributes (name mangling with _)
-        # These attributes are hidden from direct external access
-        self._last_calculated_value = None
-        self._last_calculated_factorial = None
+    # CLEAN CODE: SINGLE RESPONSIBILITY - Method does one thing: calculate factorial
+    # CLEAN CODE: MEANINGFUL NAMES - Method name is descriptive and intention-revealing
+    def calculate(self, number):
+        """Calculate factorial of a number with input validation."""
+        # CLEAN CODE: SELF-DOCUMENTATION - Code explains intent without comments
+        self._validate_input(number)
 
-    def calculate_factorial(self, number: int) -> int:
-        """
-        Calculate the factorial of a given number.
+        if self._is_cached(number):
+            return self.cached_result
 
-        OOP CONCEPT: METHOD - Function that operates on object data
-        OOP CONCEPT: ABSTRACTION - Complex calculation hidden behind simple interface
-
-        Args:
-            number: The number to calculate factorial for
-
-        Returns:
-            The factorial result as an integer
-        """
-        # OOP CONCEPT: DATA VALIDATION - Protecting object state
-        if number < 0:
-            raise ValueError("Factorial is not defined for negative numbers")
-
-        if number == 0 or number == 1:
-            return 1
-
-        # Use Python's built-in math.factorial for efficiency and accuracy
-        result = math.factorial(number)
-
-        # OOP CONCEPT: STATE MANAGEMENT - Updating internal object state
-        # Cache the result for potential future use
-        self._last_calculated_value = number
-        self._last_calculated_factorial = result
-
+        result = self._compute_factorial(number)
+        self._cache_result(number, result)
         return result
 
-    def get_last_calculation(self) -> tuple:
-        """
-        Get the last calculated factorial value and its input.
-
-        OOP CONCEPT: ACCESSOR METHOD - Controlled access to private data
-        OOP CONCEPT: ENCAPSULATION - Providing controlled access to internal state
-
-        Returns:
-            Tuple of (input_value, factorial_result) or (None, None) if no calculation done
-        """
-        return self._last_calculated_value, self._last_calculated_factorial
-
-
-# OOP CONCEPT: SEPARATE CLASS FOR DIFFERENT RESPONSIBILITY
-class DigitSumCalculator:
-    """
-    Handles digit sum computation for large numbers.
-
-    OOP CONCEPT: SINGLE RESPONSIBILITY PRINCIPLE
-    This class has one clear responsibility: calculating digit sums
-    """
-
-    def calculate_digit_sum(self, number: int) -> int:
-        """
-        Calculate the sum of all digits in a number.
-
-        OOP CONCEPT: METHOD - Behavior associated with the class
-        OOP CONCEPT: ABSTRACTION - Complex string manipulation hidden behind simple interface
-
-        Args:
-            number: The number to calculate digit sum for
-
-        Returns:
-            The sum of all digits in the number
-        """
-        # OOP CONCEPT: DATA VALIDATION AND TRANSFORMATION
+    # CLEAN CODE: MODULARITY - Private methods break down complex operations
+    # CLEAN CODE: MEANINGFUL NAMES - Method name clearly states what it validates
+    def _validate_input(self, number):
+        """Validate that input is suitable for factorial calculation."""
         if number < 0:
-            number = abs(number)  # Handle negative numbers by taking absolute value
+            raise ValueError("Factorial undefined for negative numbers")
 
-        # Convert to string and sum each digit
-        digit_sum = sum(int(digit) for digit in str(number))
+    # CLEAN CODE: SINGLE RESPONSIBILITY - Method has one job: check cache
+    def _is_cached(self, number):
+        """Check if result is already cached for this number."""
+        return self.cached_number == number and self.cached_result is not None
 
-        return digit_sum
+    # CLEAN CODE: SIMPLICITY - Simple, focused method
+    def _compute_factorial(self, number):
+        """Compute factorial using built-in function."""
+        return math.factorial(number)
+
+    # CLEAN CODE: MODULARITY - Separate caching logic
+    def _cache_result(self, number, result):
+        """Cache the calculated result for future use."""
+        self.cached_number = number
+        self.cached_result = result
+
+    # CLEAN CODE: MEANINGFUL NAMES - Method name clearly indicates return value
+    def get_last_calculation(self):
+        """Return the last calculated number and its factorial."""
+        return self.cached_number, self.cached_result
 
 
-# OOP CONCEPT: SEPARATION OF CONCERNS - Display logic in separate class
-class ResultDisplay:
-    """
-    Handles output formatting and display of results.
+# CLEAN CODE: SINGLE RESPONSIBILITY - Class has one clear purpose
+class DigitSumCalculator:
+    """Calculates the sum of digits in a number."""
 
-    OOP CONCEPT: SINGLE RESPONSIBILITY PRINCIPLE
-    This class has one clear responsibility: displaying results
-    """
+    # CLEAN CODE: MEANINGFUL NAMES - Method name is descriptive and clear
+    def calculate(self, number):
+        """Calculate sum of all digits in a number."""
+        # CLEAN CODE: SELF-DOCUMENTATION - Variable name explains the transformation
+        absolute_number = abs(number)
+
+        # CLEAN CODE: SIMPLICITY - One-line solution using built-in functions
+        return sum(int(digit) for digit in str(absolute_number))
+
+
+# CLEAN CODE: MEANINGFUL NAMES - Class name clearly indicates its responsibility
+class OutputFormatter:
+    """Formats and displays application output."""
 
     def __init__(self):
-        """
-        Initialize the result display handler.
+        # CLEAN CODE: MEANINGFUL NAMES - Constants have descriptive names
+        self.application_title = "Factorial Digit Sum Calculator"
+        self.title_separator = "=" * len(self.application_title)
 
-        OOP CONCEPT: CONSTRUCTOR - Initialize object with default state
-        """
-        # OOP CONCEPT: ENCAPSULATION - Private attributes for internal configuration
-        self._title = "Factorial Digit Sum Calculator"
-        self._separator = "=" * len(self._title)
-
-    def display_header(self):
-        """
-        Display the application header.
-
-        OOP CONCEPT: METHOD - Behavior encapsulated within the class
-        """
-        print(self._title)
-        print(self._separator)
+    # CLEAN CODE: SINGLE RESPONSIBILITY - Each method handles one type of output
+    def show_header(self):
+        """Display application header with title and separator."""
+        print(self.application_title)
+        print(self.title_separator)
         print()
 
-    def display_calculation_start(self, number: int):
-        """
-        Display message indicating calculation is starting.
-
-        OOP CONCEPT: METHOD WITH PARAMETERS - Flexible behavior based on input
-
-        Args:
-            number: The number being calculated
-        """
+    # CLEAN CODE: MEANINGFUL NAMES - Method name clearly indicates its purpose
+    def show_calculation_start(self, number):
+        """Display message indicating calculation is beginning."""
         print(f"Calculating {number}!...")
 
-    def display_factorial_result(self, number: int, factorial: int):
-        """
-        Display the factorial result.
-
-        OOP CONCEPT: METHOD - Encapsulated behavior for specific display task
-
-        Args:
-            number: The input number
-            factorial: The calculated factorial
-        """
+    # CLEAN CODE: CONSISTENCY - All display methods follow same naming pattern
+    def show_factorial_result(self, number, factorial):
+        """Display the calculated factorial result."""
         print(f"{number}! = {factorial}")
         print()
 
-    def display_final_result(self, number: int, digit_sum: int):
-        """
-        Display the final digit sum result.
-
-        OOP CONCEPT: METHOD - Specific behavior for final result display
-
-        Args:
-            number: The input number
-            digit_sum: The calculated digit sum
-        """
+    # CLEAN CODE: MEANINGFUL NAMES - Method name clearly indicates final result
+    def show_final_result(self, number, digit_sum):
+        """Display the final digit sum result."""
         print(f"Sum of digits in {number}!: {digit_sum}")
 
 
-# OOP CONCEPT: MAIN ORCHESTRATOR CLASS - Coordinates other classes
-class Application:
-    """
-    Main application orchestrator that coordinates all components.
-
-    OOP CONCEPT: COMPOSITION - This class is composed of other classes
-    OOP CONCEPT: SINGLE RESPONSIBILITY - Orchestrates the application flow
-    """
+# CLEAN CODE: MEANINGFUL NAMES - Class name clearly indicates its role
+class FactorialDigitSumApplication:
+    """Main application that coordinates factorial and digit sum calculations."""
 
     def __init__(self):
-        """
-        Initialize the application with its components.
+        # CLEAN CODE: MEANINGFUL NAMES - Instance variables have descriptive names
+        self.factorial_calculator = FactorialCalculator()
+        self.digit_sum_calculator = DigitSumCalculator()
+        self.output_formatter = OutputFormatter()
+        self.target_number = 100
 
-        OOP CONCEPT: CONSTRUCTOR - Setting up object dependencies
-        """
-        # OOP CONCEPT: COMPOSITION - Creating instances of other classes
-        # This class "has-a" relationship with other classes
-        self._factorial_calculator = FactorialCalculator()
-        self._digit_sum_calculator = DigitSumCalculator()
-        self._result_display = ResultDisplay()
-
-        # OOP CONCEPT: ENCAPSULATION - Private configuration data
-        self._target_number = 100  # Hardcoded as per requirements
-
+    # CLEAN CODE: SINGLE RESPONSIBILITY - Method orchestrates the entire workflow
     def run(self):
-        """
-        Execute the main application logic.
-
-        OOP CONCEPT: METHOD - Main behavior of the Application class
-        OOP CONCEPT: ABSTRACTION - Complex workflow hidden behind simple interface
-        OOP CONCEPT: COMPOSITION - Using other objects to accomplish tasks
-
-        This method orchestrates the entire calculation process:
-        1. Display header
-        2. Calculate factorial
-        3. Calculate digit sum
-        4. Display results
-        """
+        """Execute the complete calculation and display workflow."""
         try:
-            # OOP CONCEPT: METHOD DELEGATION - Delegating tasks to appropriate objects
-            # Display application header
-            self._result_display.display_header()
-
-            # Indicate calculation is starting
-            self._result_display.display_calculation_start(self._target_number)
-
-            # OOP CONCEPT: OBJECT COLLABORATION - Objects working together
-            # Calculate factorial using the factorial calculator
-            factorial_result = self._factorial_calculator.calculate_factorial(
-                self._target_number
-            )
-
-            # Display factorial result
-            self._result_display.display_factorial_result(
-                self._target_number, factorial_result
-            )
-
-            # Calculate digit sum using the digit sum calculator
-            digit_sum = self._digit_sum_calculator.calculate_digit_sum(factorial_result)
-
-            # Display final result
-            self._result_display.display_final_result(self._target_number, digit_sum)
-
-        except Exception as e:
-            # OOP CONCEPT: ERROR HANDLING - Protecting object state and providing feedback
-            print(f"Error: {e}")
+            self._display_application_header()
+            factorial_result = self._calculate_factorial()
+            self._display_factorial_result(factorial_result)
+            digit_sum = self._calculate_digit_sum(factorial_result)
+            self._display_final_result(digit_sum)
+            return True
+        except Exception as error:
+            self._handle_error(error)
             return False
 
-        return True
+    # CLEAN CODE: MODULARITY - Workflow broken into small, focused methods
+    # CLEAN CODE: MEANINGFUL NAMES - Method names clearly indicate their actions
+    def _display_application_header(self):
+        """Display the application header and start message."""
+        self.output_formatter.show_header()
+        self.output_formatter.show_calculation_start(self.target_number)
+
+    # CLEAN CODE: SINGLE RESPONSIBILITY - Method has one job: calculate factorial
+    def _calculate_factorial(self):
+        """Calculate factorial for the target number."""
+        return self.factorial_calculator.calculate(self.target_number)
+
+    # CLEAN CODE: SELF-DOCUMENTATION - Method name explains what it displays
+    def _display_factorial_result(self, factorial_result):
+        """Display the calculated factorial result."""
+        self.output_formatter.show_factorial_result(
+            self.target_number, factorial_result
+        )
+
+    # CLEAN CODE: SINGLE RESPONSIBILITY - Method focuses on digit sum calculation
+    def _calculate_digit_sum(self, factorial_result):
+        """Calculate the sum of digits in the factorial result."""
+        return self.digit_sum_calculator.calculate(factorial_result)
+
+    # CLEAN CODE: MEANINGFUL NAMES - Method name clearly indicates final display
+    def _display_final_result(self, digit_sum):
+        """Display the final digit sum result."""
+        self.output_formatter.show_final_result(self.target_number, digit_sum)
+
+    # CLEAN CODE: MODULARITY - Error handling separated into its own method
+    def _handle_error(self, error):
+        """Handle and display application errors."""
+        print(f"Error: {error}")
 
 
-# OOP CONCEPT: PROCEDURAL INTERFACE - Simple function interface for object-oriented code
+# CLEAN CODE: SIMPLICITY - Simple, focused function
+# CLEAN CODE: MEANINGFUL NAMES - Function name clearly indicates its purpose
+def run_factorial_digit_sum_calculator():
+    """Create and run the factorial digit sum calculator application."""
+    # CLEAN CODE: MEANINGFUL NAMES - Variable name indicates its purpose
+    application = FactorialDigitSumApplication()
+    application.run()
+
+
+# CLEAN CODE: CONSISTENCY - Main function follows standard Python convention
 def main():
-    """
-    Main entry point for the application.
-
-    OOP CONCEPT: OBJECT INSTANTIATION - Creating an instance of the Application class
-    """
-    # OOP CONCEPT: OBJECT CREATION AND METHOD INVOCATION
-    app = Application()  # Create instance
-    app.run()  # Call method on instance
+    """Application entry point."""
+    run_factorial_digit_sum_calculator()
 
 
+# CLEAN CODE: STANDARD PATTERN - Common Python idiom for script execution
 if __name__ == "__main__":
     main()
