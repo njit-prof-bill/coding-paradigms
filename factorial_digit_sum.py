@@ -1,264 +1,299 @@
 """
-Factorial Digit Sum Calculator - Object-Oriented Implementation
+Factorial Digit Sum Calculator - Functional Programming Implementation
 
 This application calculates the factorial of 100 and then computes the sum of
-all digits in the resulting factorial number. Demonstrates OOP principles
-including encapsulation, single responsibility, and composition.
+all digits in the resulting factorial number. Demonstrates functional programming
+principles including pure functions, immutability, function composition, and
+higher-order functions.
 
-OOP CONCEPTS DEMONSTRATED:
-- Encapsulation: Private attributes and methods, data hiding
-- Single Responsibility Principle: Each class has one clear purpose
-- Composition: Classes working together to achieve functionality
-- Abstraction: Complex operations hidden behind simple interfaces
-- Modularity: Code organized into logical, reusable units
+FUNCTIONAL PROGRAMMING CONCEPTS DEMONSTRATED:
+- Pure Functions: Functions with no side effects, same input = same output
+- Immutability: Data structures that don't change after creation
+- Function Composition: Building complex operations from simple functions
+- Higher-Order Functions: Functions that take or return other functions
+- Currying: Transforming functions to take one argument at a time
+- Closures: Functions that capture variables from their outer scope
+- Separation of Concerns: Pure logic separated from side effects
 """
 
 import math
+from functools import reduce
+from typing import Callable, Tuple, Dict, Any
 
 
-# OOP CONCEPT: CLASS DEFINITION - Blueprints for creating objects
-class FactorialCalculator:
+# FUNCTIONAL CONCEPT: PURE FUNCTIONS
+# These functions have no side effects and always return the same output for the same input
+def calculate_factorial(number: int) -> int:
     """
-    Handles factorial computation with encapsulation of calculation logic.
+    Pure function to calculate factorial of a number.
 
-    OOP CONCEPT: SINGLE RESPONSIBILITY PRINCIPLE
-    This class has one clear responsibility: calculating factorials
+    FUNCTIONAL CONCEPT: PURE FUNCTION - No side effects, deterministic output
+
+    Args:
+        number: The number to calculate factorial for
+
+    Returns:
+        The factorial result as an integer
+
+    Raises:
+        ValueError: If number is negative
     """
+    # FUNCTIONAL CONCEPT: IMMUTABLE INPUT VALIDATION
+    if number < 0:
+        raise ValueError("Factorial is not defined for negative numbers")
 
-    def __init__(self):
-        """
-        Initialize the factorial calculator.
-
-        OOP CONCEPT: CONSTRUCTOR - Special method to initialize object state
-        """
-        # OOP CONCEPT: ENCAPSULATION - Private attributes (name mangling with _)
-        # These attributes are hidden from direct external access
-        self._last_calculated_value = None
-        self._last_calculated_factorial = None
-
-    def calculate_factorial(self, number: int) -> int:
-        """
-        Calculate the factorial of a given number.
-
-        OOP CONCEPT: METHOD - Function that operates on object data
-        OOP CONCEPT: ABSTRACTION - Complex calculation hidden behind simple interface
-
-        Args:
-            number: The number to calculate factorial for
-
-        Returns:
-            The factorial result as an integer
-        """
-        # OOP CONCEPT: DATA VALIDATION - Protecting object state
-        if number < 0:
-            raise ValueError("Factorial is not defined for negative numbers")
-
-        if number == 0 or number == 1:
-            return 1
-
-        # Use Python's built-in math.factorial for efficiency and accuracy
-        result = math.factorial(number)
-
-        # OOP CONCEPT: STATE MANAGEMENT - Updating internal object state
-        # Cache the result for potential future use
-        self._last_calculated_value = number
-        self._last_calculated_factorial = result
-
-        return result
-
-    def get_last_calculation(self) -> tuple:
-        """
-        Get the last calculated factorial value and its input.
-
-        OOP CONCEPT: ACCESSOR METHOD - Controlled access to private data
-        OOP CONCEPT: ENCAPSULATION - Providing controlled access to internal state
-
-        Returns:
-            Tuple of (input_value, factorial_result) or (None, None) if no calculation done
-        """
-        return self._last_calculated_value, self._last_calculated_factorial
+    # FUNCTIONAL CONCEPT: USING BUILT-IN PURE FUNCTIONS
+    return math.factorial(number)
 
 
-# OOP CONCEPT: SEPARATE CLASS FOR DIFFERENT RESPONSIBILITY
-class DigitSumCalculator:
+def calculate_digit_sum(number: int) -> int:
     """
-    Handles digit sum computation for large numbers.
+    Pure function to calculate sum of digits in a number.
 
-    OOP CONCEPT: SINGLE RESPONSIBILITY PRINCIPLE
-    This class has one clear responsibility: calculating digit sums
+    FUNCTIONAL CONCEPT: PURE FUNCTION - No state mutation, no side effects
+
+    Args:
+        number: The number to calculate digit sum for
+
+    Returns:
+        The sum of all digits in the number
     """
+    # FUNCTIONAL CONCEPT: IMMUTABLE DATA TRANSFORMATION
+    # Create new value instead of mutating original
+    abs_number = abs(number)
 
-    def calculate_digit_sum(self, number: int) -> int:
-        """
-        Calculate the sum of all digits in a number.
-
-        OOP CONCEPT: METHOD - Behavior associated with the class
-        OOP CONCEPT: ABSTRACTION - Complex string manipulation hidden behind simple interface
-
-        Args:
-            number: The number to calculate digit sum for
-
-        Returns:
-            The sum of all digits in the number
-        """
-        # OOP CONCEPT: DATA VALIDATION AND TRANSFORMATION
-        if number < 0:
-            number = abs(number)  # Handle negative numbers by taking absolute value
-
-        # Convert to string and sum each digit
-        digit_sum = sum(int(digit) for digit in str(number))
-
-        return digit_sum
+    # FUNCTIONAL CONCEPT: FUNCTION COMPOSITION AND LIST COMPREHENSION
+    # Transform: number -> string -> sequence of digits -> sum
+    return sum(int(digit) for digit in str(abs_number))
 
 
-# OOP CONCEPT: SEPARATION OF CONCERNS - Display logic in separate class
-class ResultDisplay:
+# FUNCTIONAL CONCEPT: HIGHER-ORDER FUNCTIONS
+# Functions that take other functions as parameters or return functions
+def create_formatter(title: str) -> Callable[[str], str]:
     """
-    Handles output formatting and display of results.
+    Higher-order function that creates a formatter function.
 
-    OOP CONCEPT: SINGLE RESPONSIBILITY PRINCIPLE
-    This class has one clear responsibility: displaying results
+    FUNCTIONAL CONCEPT: HIGHER-ORDER FUNCTION - Returns a function
+    FUNCTIONAL CONCEPT: CLOSURE - Inner function captures outer scope variable
+
+    Args:
+        title: The title for the formatter
+
+    Returns:
+        A function that formats messages with the given title
     """
+    # FUNCTIONAL CONCEPT: IMMUTABLE LOCAL COMPUTATION
+    separator = "=" * len(title)
 
-    def __init__(self):
-        """
-        Initialize the result display handler.
+    # FUNCTIONAL CONCEPT: CLOSURE - Function that captures variables from enclosing scope
+    def format_with_header(message: str = "") -> str:
+        """Inner function that uses closure variables."""
+        if message:
+            return f"{title}\n{separator}\n\n{message}"
+        else:
+            return f"{title}\n{separator}\n"
 
-        OOP CONCEPT: CONSTRUCTOR - Initialize object with default state
-        """
-        # OOP CONCEPT: ENCAPSULATION - Private attributes for internal configuration
-        self._title = "Factorial Digit Sum Calculator"
-        self._separator = "=" * len(self._title)
-
-    def display_header(self):
-        """
-        Display the application header.
-
-        OOP CONCEPT: METHOD - Behavior encapsulated within the class
-        """
-        print(self._title)
-        print(self._separator)
-        print()
-
-    def display_calculation_start(self, number: int):
-        """
-        Display message indicating calculation is starting.
-
-        OOP CONCEPT: METHOD WITH PARAMETERS - Flexible behavior based on input
-
-        Args:
-            number: The number being calculated
-        """
-        print(f"Calculating {number}!...")
-
-    def display_factorial_result(self, number: int, factorial: int):
-        """
-        Display the factorial result.
-
-        OOP CONCEPT: METHOD - Encapsulated behavior for specific display task
-
-        Args:
-            number: The input number
-            factorial: The calculated factorial
-        """
-        print(f"{number}! = {factorial}")
-        print()
-
-    def display_final_result(self, number: int, digit_sum: int):
-        """
-        Display the final digit sum result.
-
-        OOP CONCEPT: METHOD - Specific behavior for final result display
-
-        Args:
-            number: The input number
-            digit_sum: The calculated digit sum
-        """
-        print(f"Sum of digits in {number}!: {digit_sum}")
+    return format_with_header
 
 
-# OOP CONCEPT: MAIN ORCHESTRATOR CLASS - Coordinates other classes
-class Application:
+# FUNCTIONAL CONCEPT: FACTORY FUNCTION - Returns data structure of functions
+def create_message_formatters() -> Dict[str, Callable]:
     """
-    Main application orchestrator that coordinates all components.
+    Factory function that returns a dictionary of formatting functions.
 
-    OOP CONCEPT: COMPOSITION - This class is composed of other classes
-    OOP CONCEPT: SINGLE RESPONSIBILITY - Orchestrates the application flow
+    FUNCTIONAL CONCEPT: FACTORY FUNCTION - Creates and returns related functions
+    FUNCTIONAL CONCEPT: IMMUTABLE DATA STRUCTURE - Returns dictionary of functions
+
+    Returns:
+        Dictionary containing various message formatting functions
+    """
+    # FUNCTIONAL CONCEPT: FUNCTION COMPOSITION
+    header_formatter = create_formatter("Factorial Digit Sum Calculator")
+
+    # FUNCTIONAL CONCEPT: IMMUTABLE DATA STRUCTURE OF FUNCTIONS
+    return {
+        "header": lambda: header_formatter(),
+        "calculation_start": lambda n: f"Calculating {n}!...",
+        "factorial_result": lambda n, f: f"{n}! = {f}\n",
+        "final_result": lambda n, s: f"Sum of digits in {n}!: {s}",
+    }
+
+
+# FUNCTIONAL CONCEPT: PURE FUNCTION FOR SIDE EFFECTS
+# Isolating side effects (I/O) into pure functions
+def display_message(message: str) -> None:
+    """
+    Pure function for displaying messages (isolated side effect).
+
+    FUNCTIONAL CONCEPT: SIDE EFFECT ISOLATION - I/O operations isolated
+
+    Args:
+        message: The message to display
+    """
+    print(message)
+
+
+# FUNCTIONAL CONCEPT: FUNCTION COMPOSITION
+def compose_functions(*functions: Callable) -> Callable:
+    """
+    Compose multiple functions into a single function pipeline.
+
+    FUNCTIONAL CONCEPT: FUNCTION COMPOSITION - Combining functions
+    FUNCTIONAL CONCEPT: HIGHER-ORDER FUNCTION - Takes functions as arguments
+
+    Args:
+        *functions: Variable number of functions to compose
+
+    Returns:
+        A composed function that applies all functions in sequence
+    """
+    # FUNCTIONAL CONCEPT: REDUCE - Functional approach to iteration
+    return reduce(lambda f, g: lambda x: g(f(x)), functions)
+
+
+# FUNCTIONAL CONCEPT: CURRYING - Partial application of functions
+def create_calculator_pipeline(
+    target_number: int,
+) -> Callable[[], Tuple[int, int, int]]:
+    """
+    Create a curried calculation pipeline for a specific number.
+
+    FUNCTIONAL CONCEPT: CURRYING - Partial application of functions
+    FUNCTIONAL CONCEPT: CLOSURE - Captures target_number in closure
+
+    Args:
+        target_number: The number to calculate factorial and digit sum for
+
+    Returns:
+        A function that performs the complete calculation pipeline
     """
 
-    def __init__(self):
+    # FUNCTIONAL CONCEPT: CLOSURE - Function captures outer scope variable
+    def calculation_pipeline() -> Tuple[int, int, int]:
         """
-        Initialize the application with its components.
+        Execute the calculation pipeline and return results.
 
-        OOP CONCEPT: CONSTRUCTOR - Setting up object dependencies
+        FUNCTIONAL CONCEPT: PURE FUNCTION - No side effects, deterministic
         """
-        # OOP CONCEPT: COMPOSITION - Creating instances of other classes
-        # This class "has-a" relationship with other classes
-        self._factorial_calculator = FactorialCalculator()
-        self._digit_sum_calculator = DigitSumCalculator()
-        self._result_display = ResultDisplay()
+        # FUNCTIONAL CONCEPT: FUNCTION COMPOSITION - Chaining pure functions
+        factorial_result = calculate_factorial(target_number)
+        digit_sum = calculate_digit_sum(factorial_result)
 
-        # OOP CONCEPT: ENCAPSULATION - Private configuration data
-        self._target_number = 100  # Hardcoded as per requirements
+        # FUNCTIONAL CONCEPT: IMMUTABLE RETURN VALUE
+        return target_number, factorial_result, digit_sum
 
-    def run(self):
-        """
-        Execute the main application logic.
+    return calculation_pipeline
 
-        OOP CONCEPT: METHOD - Main behavior of the Application class
-        OOP CONCEPT: ABSTRACTION - Complex workflow hidden behind simple interface
-        OOP CONCEPT: COMPOSITION - Using other objects to accomplish tasks
 
-        This method orchestrates the entire calculation process:
-        1. Display header
-        2. Calculate factorial
-        3. Calculate digit sum
-        4. Display results
-        """
-        try:
-            # OOP CONCEPT: METHOD DELEGATION - Delegating tasks to appropriate objects
-            # Display application header
-            self._result_display.display_header()
+# FUNCTIONAL CONCEPT: IMMUTABLE DATA STRUCTURES
+def create_result_data(number: int, factorial: int, digit_sum: int) -> Dict[str, Any]:
+    """
+    Create an immutable result data structure.
 
-            # Indicate calculation is starting
-            self._result_display.display_calculation_start(self._target_number)
+    FUNCTIONAL CONCEPT: IMMUTABLE DATA STRUCTURE - Dictionary that won't be modified
+    FUNCTIONAL CONCEPT: PURE FUNCTION - No side effects
 
-            # OOP CONCEPT: OBJECT COLLABORATION - Objects working together
-            # Calculate factorial using the factorial calculator
-            factorial_result = self._factorial_calculator.calculate_factorial(
-                self._target_number
-            )
+    Args:
+        number: The input number
+        factorial: The calculated factorial
+        digit_sum: The calculated digit sum
 
-            # Display factorial result
-            self._result_display.display_factorial_result(
-                self._target_number, factorial_result
-            )
+    Returns:
+        Immutable dictionary containing all results
+    """
+    # FUNCTIONAL CONCEPT: IMMUTABLE DATA CREATION
+    return {
+        "number": number,
+        "factorial": factorial,
+        "digit_sum": digit_sum,
+        "factorial_length": len(str(factorial)),
+    }
 
-            # Calculate digit sum using the digit sum calculator
-            digit_sum = self._digit_sum_calculator.calculate_digit_sum(factorial_result)
 
-            # Display final result
-            self._result_display.display_final_result(self._target_number, digit_sum)
+# FUNCTIONAL CONCEPT: PARTIAL APPLICATION
+def create_partial_formatters(formatters: Dict[str, Callable]) -> Dict[str, Callable]:
+    """
+    Create partially applied formatter functions.
 
-        except Exception as e:
-            # OOP CONCEPT: ERROR HANDLING - Protecting object state and providing feedback
-            print(f"Error: {e}")
-            return False
+    FUNCTIONAL CONCEPT: PARTIAL APPLICATION - Pre-filling function arguments
+    FUNCTIONAL CONCEPT: HIGHER-ORDER FUNCTION - Works with functions as data
+
+    Args:
+        formatters: Dictionary of formatter functions
+
+    Returns:
+        Dictionary of partially applied functions
+    """
+    return {
+        "header": formatters["header"],
+        "calculation_start": formatters["calculation_start"],
+        "factorial_result": formatters["factorial_result"],
+        "final_result": formatters["final_result"],
+    }
+
+
+# FUNCTIONAL CONCEPT: PURE FUNCTION FOR APPLICATION ORCHESTRATION
+def run_application(target_number: int = 100) -> bool:
+    """
+    Main application function using functional composition.
+
+    FUNCTIONAL CONCEPT: PURE FUNCTION - Main logic without side effects
+    FUNCTIONAL CONCEPT: FUNCTION COMPOSITION - Orchestrating pure functions
+
+    Args:
+        target_number: The number to calculate (default: 100)
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        # FUNCTIONAL CONCEPT: IMMUTABLE DATA CREATION
+        formatters = create_message_formatters()
+
+        # FUNCTIONAL CONCEPT: CURRYING - Create specialized function
+        calculator = create_calculator_pipeline(target_number)
+
+        # FUNCTIONAL CONCEPT: PURE FUNCTION EXECUTION
+        number, factorial, digit_sum = calculator()
+
+        # FUNCTIONAL CONCEPT: IMMUTABLE DATA STRUCTURE CREATION
+        result_data = create_result_data(number, factorial, digit_sum)
+
+        # FUNCTIONAL CONCEPT: FUNCTIONAL PIPELINE FOR DATA TRANSFORMATION
+        # Transform data through series of pure functions
+        messages = [
+            formatters["header"](),
+            formatters["calculation_start"](result_data["number"]),
+            formatters["factorial_result"](
+                result_data["number"], result_data["factorial"]
+            ),
+            formatters["final_result"](result_data["number"], result_data["digit_sum"]),
+        ]
+
+        # FUNCTIONAL CONCEPT: MAP OPERATION - Apply function to each element
+        # Separate pure computation from side effects
+        for message in messages:
+            display_message(message)
 
         return True
 
+    except Exception as e:
+        # FUNCTIONAL CONCEPT: ERROR HANDLING WITH SIDE EFFECT ISOLATION
+        display_message(f"Error: {e}")
+        return False
 
-# OOP CONCEPT: PROCEDURAL INTERFACE - Simple function interface for object-oriented code
-def main():
+
+# FUNCTIONAL CONCEPT: PURE MAIN FUNCTION
+def main() -> None:
     """
-    Main entry point for the application.
+    Main entry point using functional approach.
 
-    OOP CONCEPT: OBJECT INSTANTIATION - Creating an instance of the Application class
+    FUNCTIONAL CONCEPT: PURE FUNCTION - No side effects in main logic
     """
-    # OOP CONCEPT: OBJECT CREATION AND METHOD INVOCATION
-    app = Application()  # Create instance
-    app.run()  # Call method on instance
+    # FUNCTIONAL CONCEPT: APPLICATION AS FUNCTION CALL
+    run_application()
 
 
+# FUNCTIONAL CONCEPT: ENTRY POINT
 if __name__ == "__main__":
     main()
